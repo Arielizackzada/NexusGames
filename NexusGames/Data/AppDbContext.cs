@@ -15,6 +15,7 @@ namespace NexusGames.Data
             : base(options)
         {
         }
+        public DbSet<NexusGames.Models.ShoppingCart> ShoppingCart { get; set; } = default!;
 
         // Add DbSet<TEntity> properties here, for example:
         // public DbSet<YourEntity> YourEntities { get; set; }
