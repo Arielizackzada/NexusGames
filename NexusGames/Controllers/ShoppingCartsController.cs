@@ -34,7 +34,7 @@ namespace NexusGames.Controllers
             }
 
             var shoppingCart = await _context.ShoppingCart
-                .FirstOrDefaultAsync(m => m.ShoppingCartId == id);
+                .FirstOrDefaultAsync(m => m.Id == id);
             if (shoppingCart == null)
             {
                 return NotFound();
@@ -88,7 +88,7 @@ namespace NexusGames.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("ShoppingCartId,GamerId,GameId")] ShoppingCart shoppingCart)
         {
-            if (id != shoppingCart.ShoppingCartId)
+            if (id != shoppingCart.Id)
             {
                 return NotFound();
             }
@@ -102,7 +102,7 @@ namespace NexusGames.Controllers
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!ShoppingCartExists(shoppingCart.ShoppingCartId))
+                    if (!ShoppingCartExists(shoppingCart.Id))
                     {
                         return NotFound();
                     }
@@ -125,7 +125,7 @@ namespace NexusGames.Controllers
             }
 
             var shoppingCart = await _context.ShoppingCart
-                .FirstOrDefaultAsync(m => m.ShoppingCartId == id);
+                .FirstOrDefaultAsync(m => m.Id == id);
             if (shoppingCart == null)
             {
                 return NotFound();
@@ -151,7 +151,7 @@ namespace NexusGames.Controllers
 
         private bool ShoppingCartExists(int id)
         {
-            return _context.ShoppingCart.Any(e => e.ShoppingCartId == id);
+            return _context.ShoppingCart.Any(e => e.Id == id);
         }
     }
 }

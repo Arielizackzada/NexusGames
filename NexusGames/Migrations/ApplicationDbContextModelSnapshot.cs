@@ -121,6 +121,9 @@ namespace NexusGames.Migrations
                     b.Property<int>("GamerId")
                         .HasColumnType("int");
 
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
                     b.HasKey("ShoppingCartId");
 
                     b.ToTable("ShoppingCart");
