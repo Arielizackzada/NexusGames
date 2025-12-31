@@ -16,7 +16,7 @@
                 @Html.DisplayNameFor(model => model.GamerId)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.GameId)
+                @Html.DisplayNameFor(model => model.GamerId)
             </th>
             <th></th>
         </tr>
@@ -28,12 +28,12 @@
                 @Html.DisplayFor(modelItem => item.GamerId)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.GameId)
+                @Html.DisplayFor(modelItem => item.GamerId)
             </td>
             <td>
-                <a asp-action="Edit" asp-route-id="@item.ShoppingCartId">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.ShoppingCartId">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.ShoppingCartId">Delete</a>
+                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
+                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
             </td>
         </tr>
 }

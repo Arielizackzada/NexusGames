@@ -12,8 +12,8 @@ using NexusGames.Data;
 namespace NexusGames.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20251208131013_migration3")]
-    partial class migration3
+    [Migration("20251231142930_m1")]
+    partial class m1
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -112,21 +112,37 @@ namespace NexusGames.Migrations
 
             modelBuilder.Entity("NexusGames.Models.ShoppingCart", b =>
                 {
-                    b.Property<int>("ShoppingCartId")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ShoppingCartId"));
-
-                    b.Property<int>("GameId")
-                        .HasColumnType("int");
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int>("GamerId")
                         .HasColumnType("int");
 
-                    b.HasKey("ShoppingCartId");
+                    b.Property<bool>("IsPurchased")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("TotalPrice")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("GamerId");
 
                     b.ToTable("ShoppingCart");
+                });
+
+            modelBuilder.Entity("NexusGames.Models.ShoppingCart", b =>
+                {
+                    b.HasOne("NexusGames.Models.Gamer", "Gamer")
+                        .WithMany()
+                        .HasForeignKey("GamerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Gamer");
                 });
 #pragma warning restore 612, 618
         }
