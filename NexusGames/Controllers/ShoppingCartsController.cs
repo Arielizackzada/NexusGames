@@ -153,5 +153,40 @@ namespace NexusGames.Controllers
         {
             return _context.ShoppingCart.Any(e => e.Id == id);
         }
-    }
+    
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddToShoppingCart(int gameId)
+        {
+            // TEMP: assume GamerId = 1
+            var gamerId = 1;
+
+            var cart = await _context.ShoppingCart
+                .Include(c => c.CartItems)
+                .FirstOrDefaultAsync(c => c.GamerId == gamerId && !c.IsPurchased);
+
+            if (cart == null)
+            {
+                cart = new ShoppingCart { GamerId = gamerId };
+                _context.ShoppingCart.Add(cart);
+                await _context.SaveChangesAsync();
+            }
+
+            var item = new CartItem
+            {
+                ShoppingCartId = cart.Id,
+                GameId = gameId
+            };
+
+            _context.CartItems.Add(item);
+
+            var game = await _context.Games.FindAsync(gameId);
+            cart.TotalPrice += game!.Price;
+
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction("Index", "Games");
+        }
+
+    } 
 }
