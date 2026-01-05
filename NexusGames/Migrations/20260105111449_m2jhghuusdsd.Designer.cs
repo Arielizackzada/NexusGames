@@ -12,8 +12,8 @@ using NexusGames.Data;
 namespace NexusGames.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260101075806_m2")]
-    partial class m2
+    [Migration("20260105111449_m2jhghuusdsd")]
+    partial class m2jhghuusdsd
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -77,9 +77,8 @@ namespace NexusGames.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Category")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("CategoryId")
+                        .HasColumnType("int");
 
                     b.Property<string>("Description")
                         .IsRequired()
@@ -100,6 +99,8 @@ namespace NexusGames.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CategoryId");
 
                     b.ToTable("Games");
                 });
@@ -174,6 +175,17 @@ namespace NexusGames.Migrations
                     b.Navigation("Game");
 
                     b.Navigation("ShoppingCart");
+                });
+
+            modelBuilder.Entity("NexusGames.Models.Game", b =>
+                {
+                    b.HasOne("NexusGames.Models.Category", "Category")
+                        .WithMany()
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Category");
                 });
 
             modelBuilder.Entity("NexusGames.Models.ShoppingCart", b =>

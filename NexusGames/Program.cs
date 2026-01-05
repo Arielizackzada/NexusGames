@@ -18,8 +18,9 @@ IApplicationBuilder applicationBuilder = app.UseHsts();
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
-    _ = applicationBuilder;
+    app.UseHsts();
 }
+
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();

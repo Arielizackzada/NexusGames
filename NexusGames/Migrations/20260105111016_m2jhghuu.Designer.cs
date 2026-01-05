@@ -12,8 +12,8 @@ using NexusGames.Data;
 namespace NexusGames.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20251231142930_m1")]
-    partial class m1
+    [Migration("20260105111016_m2jhghuu")]
+    partial class m2jhghuu
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -24,6 +24,29 @@ namespace NexusGames.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("NexusGames.Models.CartItem", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("GameId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ShoppingCartId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("GameId");
+
+                    b.HasIndex("ShoppingCartId");
+
+                    b.ToTable("CartItems");
+                });
 
             modelBuilder.Entity("NexusGames.Models.Category", b =>
                 {
@@ -134,6 +157,25 @@ namespace NexusGames.Migrations
                     b.ToTable("ShoppingCart");
                 });
 
+            modelBuilder.Entity("NexusGames.Models.CartItem", b =>
+                {
+                    b.HasOne("NexusGames.Models.Game", "Game")
+                        .WithMany()
+                        .HasForeignKey("GameId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("NexusGames.Models.ShoppingCart", "ShoppingCart")
+                        .WithMany("CartItems")
+                        .HasForeignKey("ShoppingCartId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Game");
+
+                    b.Navigation("ShoppingCart");
+                });
+
             modelBuilder.Entity("NexusGames.Models.ShoppingCart", b =>
                 {
                     b.HasOne("NexusGames.Models.Gamer", "Gamer")
@@ -143,6 +185,11 @@ namespace NexusGames.Migrations
                         .IsRequired();
 
                     b.Navigation("Gamer");
+                });
+
+            modelBuilder.Entity("NexusGames.Models.ShoppingCart", b =>
+                {
+                    b.Navigation("CartItems");
                 });
 #pragma warning restore 612, 618
         }
