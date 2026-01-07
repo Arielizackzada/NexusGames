@@ -17,20 +17,25 @@ namespace NexusGames.Controllers
         // GET: Games
         public IActionResult Index()
         {
-            var games = _context.Games.Include(g => g.Category).ToList();
+            var games = _context.Games
+                .Include(g => g.Category)
+                .ToList();
+
             return View(games);
         }
 
         // GET: Games/Details/5
         public IActionResult Details(int? id)
         {
-            if (id == null) return NotFound();
+            if (id == null)
+                return NotFound();
 
             var game = _context.Games
                 .Include(g => g.Category)
                 .FirstOrDefault(g => g.Id == id);
 
-            if (game == null) return NotFound();
+            if (game == null)
+                return NotFound();
 
             return View(game);
         }
@@ -45,27 +50,29 @@ namespace NexusGames.Controllers
         // POST: Games/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Create(Game game)
+        public async Task<IActionResult> Create(Game game)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                _context.Games.Add(game);
-                _context.SaveChanges();
-                return RedirectToAction(nameof(Index));
+                ViewBag.Categories = _context.Categories.ToList();
+                return View(game);
             }
 
-            // Re-populate categories if validation fails
-            ViewBag.Categories = _context.Categories.ToList();
-            return View(game);
+            _context.Games.Add(game);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Index));
         }
 
         // GET: Games/Edit/5
         public IActionResult Edit(int? id)
         {
-            if (id == null) return NotFound();
+            if (id == null)
+                return NotFound();
 
             var game = _context.Games.Find(id);
-            if (game == null) return NotFound();
+            if (game == null)
+                return NotFound();
 
             ViewBag.Categories = _context.Categories.ToList();
             return View(game);
@@ -76,40 +83,33 @@ namespace NexusGames.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Edit(int id, Game game)
         {
-            if (id != game.Id) return NotFound();
+            if (id != game.Id)
+                return NotFound();
 
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                try
-                {
-                    _context.Update(game);
-                    _context.SaveChanges();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!_context.Games.Any(e => e.Id == id))
-                        return NotFound();
-                    else
-                        throw;
-                }
-                return RedirectToAction(nameof(Index));
+                ViewBag.Categories = _context.Categories.ToList();
+                return View(game);
             }
 
-            // Re-populate categories if validation fails
-            ViewBag.Categories = _context.Categories.ToList();
-            return View(game);
+            _context.Update(game);
+            _context.SaveChanges();
+
+            return RedirectToAction(nameof(Index));
         }
 
         // GET: Games/Delete/5
         public IActionResult Delete(int? id)
         {
-            if (id == null) return NotFound();
+            if (id == null)
+                return NotFound();
 
             var game = _context.Games
                 .Include(g => g.Category)
                 .FirstOrDefault(g => g.Id == id);
 
-            if (game == null) return NotFound();
+            if (game == null)
+                return NotFound();
 
             return View(game);
         }
@@ -120,11 +120,13 @@ namespace NexusGames.Controllers
         public IActionResult DeleteConfirmed(int id)
         {
             var game = _context.Games.Find(id);
+
             if (game != null)
             {
                 _context.Games.Remove(game);
                 _context.SaveChanges();
             }
+
             return RedirectToAction(nameof(Index));
         }
     }
