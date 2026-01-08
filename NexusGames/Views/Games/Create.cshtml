@@ -10,25 +10,23 @@
 <hr />
 <div class="row">
     <div class="col-md-4">
-        <div asp-action="Create">
+        <form asp-action="Create">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
                 <label asp-for="Name" class="control-label"></label>
                 <input asp-for="Name" class="form-control" />
                 <span asp-validation-for="Name" class="text-danger"></span>
             </div>
-            <label asp-for="CategoryId" class="control-label"></label>
-            <select asp-for="CategoryId" class="form-control">
+            <label asp-for="Categories" class="control-label"></label>
+            <select asp-for="Categories" class="form-control">
                 <option value="">-- Select Category --</option>
                 @foreach (var category in ViewBag.Categories)
                 {
                     <option value="@category.Id">@category.Name</option>
                 }
+                    >
             </select>
-            <span asp-validation-for="CategoryId" class="text-danger"></span>
-
-            </div>
-
+            <span asp-validation-for="Categories" class="text-danger"></span>
             <div class="form-group">
                 <label asp-for="ReleaseDate" class="control-label"></label>
                 <input asp-for="ReleaseDate" class="form-control" />
@@ -57,6 +55,8 @@
             <div class="form-group">
                 <input type="submit" value="Create" class="btn btn-primary" />
             </div>
+        </form>
+
         </div>
     </div>
 </div>

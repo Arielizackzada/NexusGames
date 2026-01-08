@@ -23,18 +23,26 @@
             </div>
 
             <div class="form-group">
-                <label asp-for="CategoryId" class="control-label"></label>
-                <select asp-for="CategoryId" class="form-control">
+                <label asp-for="Categories" class="control-label">Categories</label>
+                <select asp-for="Name" name="Categories" class="form-control" multiple>
                     @foreach (var category in ViewBag.Categories)
                     {
-                        <option value="@category.Id"
-                                selected="@(category.Id == Model.CategoryId)">
-                            @category.Name
-                        </option>
+                        if (Model.Categories.Any(c => c.Id == category.Id))
+                        {
+                            <option value="@category.Id" selected>
+                                @category.Name
+                            </option>
+                        }
+                        else
+                        {
+                            <option value="@category.Id">
+                                @category.Name
+                            </option>
+                        }
                     }
                 </select>
-                <span asp-validation-for="CategoryId" class="text-danger"></span>
             </div>
+
 
             <div class="form-group">
                 <label asp-for="ReleaseDate" class="control-label"></label>

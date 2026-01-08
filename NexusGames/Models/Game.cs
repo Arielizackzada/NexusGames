@@ -1,24 +1,33 @@
-﻿namespace NexusGames.Models
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace NexusGames.Models
 {
-        public class Game
-        {
-            public int Id { get; set; }
+    public class Game
+    {
+        public int Id { get; set; }
 
-            public string Name { get; set; } = string.Empty;
+        [Required]
+        [StringLength(250, ErrorMessage = "Invalid Name")]
+        public string Name { get; set; } = string.Empty;
 
-            public int CategoryId { get; set; }
-            public Category? Category { get; set; }
+        public ICollection<Category> Categories { get; set; } = [];
 
-            public DateTime ReleaseDate { get; set; }
+        [Required(ErrorMessage = "Invalid Date")]
+        public DateTime ReleaseDate { get; set; }
 
-            public string Description { get; set; } = string.Empty;
+        [StringLength(1000)]
+        public string Description { get; set; } = string.Empty;
 
-            public string Author { get; set; } = string.Empty;
+        [StringLength(250)]
+        public string Author { get; set; } = string.Empty;
 
-            public int Price { get; set; }
+        [Range(0, int.MaxValue)]
+        public int Price { get; set; }
 
-            public string imageUrl { get; set; } = string.Empty;
-        }
+        [Url]
+        public string imageUrl { get; set; } = string.Empty;
+    }
+
 }
 
 

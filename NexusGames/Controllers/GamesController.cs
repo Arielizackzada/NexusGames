@@ -18,7 +18,7 @@ namespace NexusGames.Controllers
         public IActionResult Index()
         {
             var games = _context.Games
-                .Include(g => g.Category)
+                .Include(g => g.Categories)
                 .ToList();
 
             return View(games);
@@ -31,7 +31,7 @@ namespace NexusGames.Controllers
                 return NotFound();
 
             var game = _context.Games
-                .Include(g => g.Category)
+                .Include(g => g.Categories)
                 .FirstOrDefault(g => g.Id == id);
 
             if (game == null)
@@ -62,6 +62,7 @@ namespace NexusGames.Controllers
             await _context.SaveChangesAsync();
 
             return RedirectToAction(nameof(Index));
+            
         }
 
         // GET: Games/Edit/5
@@ -81,22 +82,28 @@ namespace NexusGames.Controllers
         // POST: Games/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Edit(int id, Game game)
+        [HttpPost]
+        public IActionResult Edit(Game game, int[] CategoryIds)
         {
-            if (id != game.Id)
-                return NotFound();
+            var existingGame = _context.Games
+                .Include(g => g.Categories)
+                .First(g => g.Id == game.Id);
 
-            if (!ModelState.IsValid)
+            existingGame.Name = game.Name;
+
+            var categories = _context.Categories
+                .Where(c => CategoryIds.Contains(c.Id))
+                .ToList();
+
+            foreach (var category in categories)
             {
-                ViewBag.Categories = _context.Categories.ToList();
-                return View(game);
+                existingGame.Categories.Add(category);
             }
 
-            _context.Update(game);
             _context.SaveChanges();
-
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction("Index");
         }
+
 
         // GET: Games/Delete/5
         public IActionResult Delete(int? id)
@@ -105,7 +112,7 @@ namespace NexusGames.Controllers
                 return NotFound();
 
             var game = _context.Games
-                .Include(g => g.Category)
+                .Include(g => g.Categories)
                 .FirstOrDefault(g => g.Id == id);
 
             if (game == null)
