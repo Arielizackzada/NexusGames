@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using NexusGames.Data;
 using NexusGames.Models;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace NexusGames.Controllers
 {
@@ -15,24 +16,24 @@ namespace NexusGames.Controllers
         }
 
         // GET: Games
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            var games = _context.Games
-                .Include(g => g.Categories)
-                .ToList();
+            var games = await _context.Games
+                .Include(g => g.Category)
+                .ToListAsync();
 
             return View(games);
         }
 
         // GET: Games/Details/5
-        public IActionResult Details(int? id)
+        public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
                 return NotFound();
 
-            var game = _context.Games
-                .Include(g => g.Categories)
-                .FirstOrDefault(g => g.Id == id);
+            var game = await _context.Games
+                .Include(g => g.Category)
+                .FirstOrDefaultAsync(g => g.Id == id);
 
             if (game == null)
                 return NotFound();
@@ -52,6 +53,9 @@ namespace NexusGames.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Game game)
         {
+            // הסרת ה-Validation של אובייקט הקטגוריה כדי לאפשר שמירה רק עם ה-ID
+            ModelState.Remove("Category");
+
             if (!ModelState.IsValid)
             {
                 ViewBag.Categories = _context.Categories.ToList();
@@ -62,16 +66,15 @@ namespace NexusGames.Controllers
             await _context.SaveChangesAsync();
 
             return RedirectToAction(nameof(Index));
-            
         }
 
         // GET: Games/Edit/5
-        public IActionResult Edit(int? id)
+        public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
                 return NotFound();
 
-            var game = _context.Games.Find(id);
+            var game = await _context.Games.FindAsync(id);
             if (game == null)
                 return NotFound();
 
@@ -82,38 +85,46 @@ namespace NexusGames.Controllers
         // POST: Games/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [HttpPost]
-        public IActionResult Edit(Game game, int[] CategoryIds)
+        public async Task<IActionResult> Edit(Game game)
         {
-            var existingGame = _context.Games
-                .Include(g => g.Categories)
-                .First(g => g.Id == game.Id);
+            // הסרת ה-Validation של אובייקט הקטגוריה כדי לאפשר עדכון רק עם ה-ID
+            ModelState.Remove("Category");
 
-            existingGame.Name = game.Name;
-
-            var categories = _context.Categories
-                .Where(c => CategoryIds.Contains(c.Id))
-                .ToList();
-
-            foreach (var category in categories)
+            if (!ModelState.IsValid)
             {
-                existingGame.Categories.Add(category);
+                ViewBag.Categories = _context.Categories.ToList();
+                return View(game);
             }
 
-            _context.SaveChanges();
-            return RedirectToAction("Index");
+            try
+            {
+                _context.Update(game);
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!GameExists(game.Id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
+            return RedirectToAction(nameof(Index));
         }
 
-
         // GET: Games/Delete/5
-        public IActionResult Delete(int? id)
+        public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
                 return NotFound();
 
-            var game = _context.Games
-                .Include(g => g.Categories)
-                .FirstOrDefault(g => g.Id == id);
+            var game = await _context.Games
+                .Include(g => g.Category)
+                .FirstOrDefaultAsync(g => g.Id == id);
 
             if (game == null)
                 return NotFound();
@@ -124,17 +135,22 @@ namespace NexusGames.Controllers
         // POST: Games/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public IActionResult DeleteConfirmed(int id)
+        public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var game = _context.Games.Find(id);
+            var game = await _context.Games.FindAsync(id);
 
             if (game != null)
             {
                 _context.Games.Remove(game);
-                _context.SaveChanges();
+                await _context.SaveChangesAsync();
             }
 
             return RedirectToAction(nameof(Index));
+        }
+
+        private bool GameExists(int id)
+        {
+            return _context.Games.Any(e => e.Id == id);
         }
     }
 }

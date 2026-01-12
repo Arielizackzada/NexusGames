@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using NexusGames.Data;
 using NexusGames.Models;
@@ -19,158 +18,67 @@ namespace NexusGames.Controllers
             _context = context;
         }
 
-        // GET: ShoppingCarts
         public async Task<IActionResult> Index()
         {
-            return View(await _context.ShoppingCart.ToListAsync());
+            // אנחנו מחפשים את המשתמש הראשון הקיים במערכת
+            var gamer = await _context.Gamers.FirstOrDefaultAsync();
+            if (gamer == null) return View(new ShoppingCart { CartItems = new List<CartItem>(), TotalPrice = 0 });
+
+            var cart = await _context.ShoppingCart
+                .Include(c => c.CartItems)
+                    .ThenInclude(ci => ci.Game)
+                .FirstOrDefaultAsync(c => c.GamerId == gamer.Id && !c.IsPurchased);
+
+            if (cart == null)
+            {
+                return View(new ShoppingCart { CartItems = new List<CartItem>(), TotalPrice = 0 });
+            }
+
+            return View(cart);
         }
 
-        // GET: ShoppingCarts/Details/5
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var shoppingCart = await _context.ShoppingCart
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (shoppingCart == null)
-            {
-                return NotFound();
-            }
-
-            return View(shoppingCart);
-        }
-
-        // GET: ShoppingCarts/Create
-        public IActionResult Create()
-        {
-            return View();
-        }
-
-        // POST: ShoppingCarts/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ShoppingCartId,GamerId,GameId")] ShoppingCart shoppingCart)
-        {
-            if (ModelState.IsValid)
-            {
-                _context.Add(shoppingCart);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            return View(shoppingCart);
-        }
-
-        // GET: ShoppingCarts/Edit/5
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var shoppingCart = await _context.ShoppingCart.FindAsync(id);
-            if (shoppingCart == null)
-            {
-                return NotFound();
-            }
-            return View(shoppingCart);
-        }
-
-        // POST: ShoppingCarts/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ShoppingCartId,GamerId,GameId")] ShoppingCart shoppingCart)
-        {
-            if (id != shoppingCart.Id)
-            {
-                return NotFound();
-            }
-
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    _context.Update(shoppingCart);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!ShoppingCartExists(shoppingCart.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
-            }
-            return View(shoppingCart);
-        }
-
-        // GET: ShoppingCarts/Delete/5
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var shoppingCart = await _context.ShoppingCart
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (shoppingCart == null)
-            {
-                return NotFound();
-            }
-
-            return View(shoppingCart);
-        }
-
-        // POST: ShoppingCarts/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            var shoppingCart = await _context.ShoppingCart.FindAsync(id);
-            if (shoppingCart != null)
-            {
-                _context.ShoppingCart.Remove(shoppingCart);
-            }
-
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
-        }
-
-        private bool ShoppingCartExists(int id)
-        {
-            return _context.ShoppingCart.Any(e => e.Id == id);
-        }
-    
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddToShoppingCart(int gameId)
         {
-            // TEMP: assume GamerId = 1
-            var gamerId = 1;
+            // 1. ננסה למצוא משתמש קיים
+            var gamer = await _context.Gamers.FirstOrDefaultAsync();
 
+            // 2. אם אין אף משתמש, ניצור אחד (בלי להגדיר ID ידנית)
+            if (gamer == null)
+            {
+                gamer = new Gamer
+                {
+                    Username = "Ariel",
+                    Email = "ariel@example.com",
+                    CreditCard = "123456789",
+                    DateOfBirth = DateTime.Now.AddYears(-20)
+                };
+                _context.Gamers.Add(gamer);
+                await _context.SaveChangesAsync(); // SQL ייתן לו ID כאן
+            }
+
+            // 3. מציאת עגלה פעילה למשתמש שמצאנו/צרנו
             var cart = await _context.ShoppingCart
                 .Include(c => c.CartItems)
-                .FirstOrDefaultAsync(c => c.GamerId == gamerId && !c.IsPurchased);
+                .FirstOrDefaultAsync(c => c.GamerId == gamer.Id && !c.IsPurchased);
 
+            // 4. אם אין עגלה, יצירת חדשה
             if (cart == null)
             {
-                cart = new ShoppingCart { GamerId = gamerId };
+                cart = new ShoppingCart
+                {
+                    GamerId = gamer.Id,
+                    TotalPrice = 0,
+                    IsPurchased = false
+                };
                 _context.ShoppingCart.Add(cart);
                 await _context.SaveChangesAsync();
             }
+
+            // 5. מציאת המשחק והוספה לעגלה
+            var game = await _context.Games.FindAsync(gameId);
+            if (game == null) return NotFound();
 
             var item = new CartItem
             {
@@ -179,14 +87,36 @@ namespace NexusGames.Controllers
             };
 
             _context.CartItems.Add(item);
-
-            var game = await _context.Games.FindAsync(gameId);
-            cart.TotalPrice += game!.Price;
+            cart.TotalPrice += (int)game.Price;
 
             await _context.SaveChangesAsync();
+            TempData["SuccessMessage"] = "המשחק נוסף לסל הקניות בהצלחה!";
 
             return RedirectToAction("Index", "Games");
         }
 
-    } 
+        // שאר הפעולות (Details, Delete) נשארות כפי שהיו
+        public async Task<IActionResult> Details(int? id)
+        {
+            if (id == null) return NotFound();
+            var shoppingCart = await _context.ShoppingCart
+                .Include(c => c.CartItems).ThenInclude(ci => ci.Game)
+                .FirstOrDefaultAsync(m => m.Id == id);
+            if (shoppingCart == null) return NotFound();
+            return View(shoppingCart);
+        }
+
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(int id)
+        {
+            var shoppingCart = await _context.ShoppingCart.FindAsync(id);
+            if (shoppingCart != null)
+            {
+                _context.ShoppingCart.Remove(shoppingCart);
+                await _context.SaveChangesAsync();
+            }
+            return RedirectToAction(nameof(Index));
+        }
+    }
 }

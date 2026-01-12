@@ -1,4 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
 
 namespace NexusGames.Models
 {
@@ -7,27 +9,27 @@ namespace NexusGames.Models
         public int Id { get; set; }
 
         [Required]
-        [StringLength(250, ErrorMessage = "Invalid Name")]
-        public string Name { get; set; } = string.Empty;
+        public string Name { get; set; }
 
-        public ICollection<Category> Categories { get; set; } = [];
+        [Required]
+        public int? CategoryId { get; set; }  
 
-        [Required(ErrorMessage = "Invalid Date")]
+        public Category? Category { get; set; } 
+
         public DateTime ReleaseDate { get; set; }
 
-        [StringLength(1000)]
-        public string Description { get; set; } = string.Empty;
+        public string Description { get; set; }
 
-        [StringLength(250)]
-        public string Author { get; set; } = string.Empty;
+        public string Author { get; set; }
 
-        [Range(0, int.MaxValue)]
-        public int Price { get; set; }
+        [Column(TypeName = "decimal(18,2)")]
 
-        [Url]
-        public string imageUrl { get; set; } = string.Empty;
+        public decimal Price { get; set; }
+
+        public string imageUrl { get; set; }
     }
-
 }
+
+
 
 
