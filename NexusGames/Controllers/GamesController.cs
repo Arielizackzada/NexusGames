@@ -22,6 +22,21 @@ namespace NexusGames.Controllers
                 .Include(g => g.Category)
                 .ToListAsync();
 
+            // --- לוגיקה לבדיקה אילו משחקים כבר בסל ---
+            var gamer = await _context.Gamers.FirstOrDefaultAsync();
+            var gamesInCartIds = new List<int>();
+
+            if (gamer != null)
+            {
+                gamesInCartIds = await _context.CartItems
+                    .Where(ci => ci.ShoppingCart.GamerId == gamer.Id && !ci.ShoppingCart.IsPurchased)
+                    .Select(ci => ci.GameId)
+                    .ToListAsync();
+            }
+
+            ViewBag.GamesInCartIds = gamesInCartIds;
+            // ---------------------------------------
+
             return View(games);
         }
 
@@ -48,12 +63,10 @@ namespace NexusGames.Controllers
             return View();
         }
 
-        // POST: Games/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Game game)
         {
-            // הסרת ה-Validation של אובייקט הקטגוריה כדי לאפשר שמירה רק עם ה-ID
             ModelState.Remove("Category");
 
             if (!ModelState.IsValid)
@@ -82,12 +95,10 @@ namespace NexusGames.Controllers
             return View(game);
         }
 
-        // POST: Games/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(Game game)
         {
-            // הסרת ה-Validation של אובייקט הקטגוריה כדי לאפשר עדכון רק עם ה-ID
             ModelState.Remove("Category");
 
             if (!ModelState.IsValid)
@@ -104,13 +115,9 @@ namespace NexusGames.Controllers
             catch (DbUpdateConcurrencyException)
             {
                 if (!GameExists(game.Id))
-                {
                     return NotFound();
-                }
                 else
-                {
                     throw;
-                }
             }
 
             return RedirectToAction(nameof(Index));
@@ -132,7 +139,6 @@ namespace NexusGames.Controllers
             return View(game);
         }
 
-        // POST: Games/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)

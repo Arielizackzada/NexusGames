@@ -12,7 +12,7 @@ using NexusGames.Data;
 namespace NexusGames.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260114144127_m1")]
+    [Migration("20260114201030_m1")]
     partial class m1
     {
         /// <inheritdoc />

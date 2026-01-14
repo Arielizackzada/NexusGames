@@ -1,74 +1,153 @@
 ﻿@model IEnumerable<NexusGames.Models.Game>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Games Store";
+    var gamesInCartIds = ViewBag.GamesInCartIds as List<int> ?? new List<int>();
 }
 
-<h1>Index</h1>
-@if (TempData["SuccessMessage"] != null)
-{
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
-        @TempData["SuccessMessage"]
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-5">
+        <div>
+            <h1 class="fw-bold mb-0">Game Collection</h1>
+            <p class="text-muted">Manage and explore your digital library</p>
+        </div>
+        <a asp-action="Create" class="btn btn-primary btn-lg shadow-sm px-4">
+            <i class="bi bi-plus-circle me-2"></i>Create New Game
+        </a>
     </div>
-}
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show shadow-sm border-0" role="alert" style="border-left: 5px solid #28a745;">
+            <i class="bi bi-check-circle-fill me-2"></i> @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
 
-<table class="table">
-    <thead>
-        <tr>
-            <th>@Html.DisplayNameFor(model => model.Name)</th>
-            <th>@Html.DisplayNameFor(model => model.Category)</th>
-            <th>@Html.DisplayNameFor(model => model.ReleaseDate)</th>
-            <th>@Html.DisplayNameFor(model => model.Description)</th>
-            <th>@Html.DisplayNameFor(model => model.Author)</th>
-            <th>@Html.DisplayNameFor(model => model.Price)</th>
-            <th>@Html.DisplayNameFor(model => model.imageUrl)</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
-        {
-            <tr>
-                <td>@Html.DisplayFor(modelItem => item.Name)</td>
-                <td>@Html.DisplayFor(modelItem => item.Category)</td>
-                <td>@Html.DisplayFor(modelItem => item.ReleaseDate)</td>
-                <td>@Html.DisplayFor(modelItem => item.Description)</td>
-                <td>@Html.DisplayFor(modelItem => item.Author)</td>
-                <td>@Html.DisplayFor(modelItem => item.Price)</td>
-                <td>
-                    @if (!string.IsNullOrEmpty(item.imageUrl))
-                    {
-                        <img src="@item.imageUrl"
-                             alt="@item.Name"
-                             style="max-width:100px; max-height:100px;" />
-                    }
-                </td>
-                <td>
-                    <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                    <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                    <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+    <div class="table-responsive shadow-lg rounded-4 bg-white">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="bg-light">
+                <tr class="text-secondary uppercase-header">
+                    <th class="ps-4 py-3">Game Details</th>
+                    <th class="py-3">Category</th>
+                    <th class="py-3 text-center">Preview</th>
+                    <th class="py-3 text-center">Management & Purchase</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    bool isAlreadyInCart = gamesInCartIds.Contains(item.Id);
+                    
+                    <tr>
+                        <td class="ps-4">
+                            <div class="fw-bold fs-5 text-dark">@item.Name</div>
+                            <div class="text-muted small mb-2">By @item.Author</div>
+                            <div class="fw-bold text-success fs-4">₪@item.Price</div>
+                        </td>
+                        <td>
+                            <span class="badge rounded-pill bg-info text-dark px-3 py-2">@item.Category?.Name</span>
+                        </td>
+                        <td class="text-center">
+                            @if (!string.IsNullOrEmpty(item.imageUrl))
+                            {
+                                <div class="image-wrapper">
+                                    <img src="@item.imageUrl" alt="@item.Name" class="game-img-large shadow" />
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="no-image-box">No Preview</div>
+                            }
+                        </td>
+                        <td class="text-center">
+                            <div class="d-flex gap-2 justify-content-center mb-3">
+                                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-warning fw-bold px-3">
+                                    <i class="bi bi-pencil-fill"></i> Edit
+                                </a>
+                                <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-info fw-bold text-white px-3">
+                                    <i class="bi bi-eye-fill"></i> Details
+                                </a>
+                                <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger fw-bold px-3">
+                                    <i class="bi bi-trash-fill"></i> Delete
+                                </a>
+                            </div>
 
-                    <br /><br />
+                            @if (isAlreadyInCart)
+                            {
+                                <button class="btn btn-outline-secondary w-75 fw-bold py-2 disabled" style="border-style: dashed;">
+                                    <i class="bi bi-cart-check-fill me-2"></i>In Your Cart
+                                </button>
+                            }
+                            else
+                            {
+                                <form asp-controller="ShoppingCarts" asp-action="AddToShoppingCart" method="post">
+                                    <input type="hidden" name="gameId" value="@item.Id" />
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-success w-75 fw-bold py-2 shadow-sm cart-btn">
+                                        <i class="bi bi-cart-plus-fill me-2"></i>Add to Shopping Cart
+                                    </button>
+                                </form>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
 
-                    <!-- ✅ ADD TO SHOPPING CART BUTTON -->
-                    <form asp-controller="ShoppingCarts"
-                          asp-action="AddToShoppingCart"
-                          method="post"
-                          style="display:inline;">
-                        <input type="hidden" name="gameId" value="@item.Id" />
-                        @Html.AntiForgeryToken()
-                        <button type="submit" class="btn btn-success btn-sm">
-                            Add To Shopping Cart
-                        </button>
-                    </form>
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+<style>
+    /* הרחבת התמונה משמעותית */
+    .game-img-large {
+        width: 250px; /* רוחב מורחב */
+        height: 150px; /* גובה מותאם */
+        object-fit: cover;
+        border-radius: 12px;
+        transition: all 0.3s ease;
+        border: 3px solid #fff;
+    }
 
+    .image-wrapper {
+        padding: 10px 0;
+    }
+
+    .game-img-large:hover {
+        transform: scale(1.05);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.2) !important;
+    }
+
+    .no-image-box {
+        width: 250px;
+        height: 150px;
+        background: #f8f9fa;
+        border: 2px dashed #dee2e6;
+        border-radius: 12px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: #adb5bd;
+    }
+
+    /* שיפור נראות הכפתורים */
+    .cart-btn {
+        transition: background 0.3s ease;
+        border-radius: 10px;
+    }
+
+    .cart-btn:hover {
+        background-color: #1e7e34;
+    }
+
+    .uppercase-header {
+        font-size: 0.75rem;
+        font-weight: 700;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+    }
+
+    /* עיצוב הטבלה */
+    .table-hover tbody tr:hover {
+        background-color: rgba(0,0,0,0.01);
+    }
+</style>

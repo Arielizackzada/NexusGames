@@ -20,7 +20,6 @@ namespace NexusGames.Controllers
 
         public async Task<IActionResult> Index()
         {
-            // אנחנו מחפשים את המשתמש הראשון הקיים במערכת
             var gamer = await _context.Gamers.FirstOrDefaultAsync();
             if (gamer == null) return View(new ShoppingCart { CartItems = new List<CartItem>(), TotalPrice = 0 });
 
@@ -41,10 +40,7 @@ namespace NexusGames.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddToShoppingCart(int gameId)
         {
-            // 1. ננסה למצוא משתמש קיים
             var gamer = await _context.Gamers.FirstOrDefaultAsync();
-
-            // 2. אם אין אף משתמש, ניצור אחד (בלי להגדיר ID ידנית)
             if (gamer == null)
             {
                 gamer = new Gamer
@@ -55,47 +51,61 @@ namespace NexusGames.Controllers
                     DateOfBirth = DateTime.Now.AddYears(-20)
                 };
                 _context.Gamers.Add(gamer);
-                await _context.SaveChangesAsync(); // SQL ייתן לו ID כאן
+                await _context.SaveChangesAsync();
             }
 
-            // 3. מציאת עגלה פעילה למשתמש שמצאנו/צרנו
             var cart = await _context.ShoppingCart
                 .Include(c => c.CartItems)
                 .FirstOrDefaultAsync(c => c.GamerId == gamer.Id && !c.IsPurchased);
 
-            // 4. אם אין עגלה, יצירת חדשה
             if (cart == null)
             {
-                cart = new ShoppingCart
-                {
-                    GamerId = gamer.Id,
-                    TotalPrice = 0,
-                    IsPurchased = false
-                };
+                cart = new ShoppingCart { GamerId = gamer.Id, TotalPrice = 0, IsPurchased = false };
                 _context.ShoppingCart.Add(cart);
                 await _context.SaveChangesAsync();
             }
 
-            // 5. מציאת המשחק והוספה לעגלה
+            if (cart.CartItems.Any(ci => ci.GameId == gameId))
+            {
+                TempData["ErrorMessage"] = "המשחק כבר נמצא בסל הקניות שלך!";
+                return RedirectToAction("Index", "Games");
+            }
+
             var game = await _context.Games.FindAsync(gameId);
             if (game == null) return NotFound();
 
-            var item = new CartItem
-            {
-                ShoppingCartId = cart.Id,
-                GameId = gameId
-            };
-
+            var item = new CartItem { ShoppingCartId = cart.Id, GameId = gameId };
             _context.CartItems.Add(item);
             cart.TotalPrice += (int)game.Price;
 
             await _context.SaveChangesAsync();
             TempData["SuccessMessage"] = "המשחק נוסף לסל הקניות בהצלחה!";
-
             return RedirectToAction("Index", "Games");
         }
 
-        // שאר הפעולות (Details, Delete) נשארות כפי שהיו
+        // --- פעולה חדשה: הסרת משחק בודד מהסל ---
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RemoveFromCart(int cartItemId)
+        {
+            var item = await _context.CartItems
+                .Include(ci => ci.Game)
+                .Include(ci => ci.ShoppingCart)
+                .FirstOrDefaultAsync(ci => ci.Id == cartItemId);
+
+            if (item != null)
+            {
+                // עדכון המחיר הכולל בעגלה לפני המחיקה
+                item.ShoppingCart.TotalPrice -= (int)item.Game.Price;
+
+                _context.CartItems.Remove(item);
+                await _context.SaveChangesAsync();
+                TempData["SuccessMessage"] = "המשחק הוסר מהסל בהצלחה.";
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
+
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null) return NotFound();
