@@ -12,6 +12,9 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 var app = builder.Build();
 
+// --- TRIGGER SEEDING ---
+
+
 IApplicationBuilder applicationBuilder = app.UseHsts();
 
 // Configure the HTTP request pipeline.

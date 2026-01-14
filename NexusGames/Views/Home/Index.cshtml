@@ -1,8 +1,53 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "NexusGames | Level Up Your Play";
 }
 
-<div class="text-center">
-    <h1 class="display-4">NexusGames</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="hero-section text-white d-flex align-items-center justify-content-center" style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); min-height: 60vh; border-radius: 20px; margin-top: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+    <div class="text-center p-5">
+        <h1 class="display-2 fw-bold mb-3" style="letter-spacing: -2px;">NEXUS<span style="color: #4ecca3;">GAMES</span></h1>
+        <p class="lead mb-4 opacity-75">חנות המשחקים הדיגיטלית המובילה לגיימרים אמיתיים</p>
+        <div class="d-grid gap-3 d-sm-flex justify-content-sm-center">
+            <a asp-controller="Games" asp-action="Index" class="btn btn-primary btn-lg px-5 py-3 fw-bold shadow-sm" style="background-color: #4ecca3; border: none; border-radius: 10px;">Browse All Games</a>
+            <a asp-controller="ShoppingCarts" asp-action="Index" class="btn btn-outline-light btn-lg px-4 py-3" style="border-radius: 10px;">View My Cart</a>
+        </div>
+    </div>
 </div>
+
+<div class="container mt-5 pt-4">
+    <div class="row text-center">
+        <div class="col-md-4 mb-4">
+            <div class="p-4 rounded-4 shadow-sm h-100 bg-white border">
+                <div class="h1 mb-3">🚀</div>
+                <h3 class="h5 fw-bold">Instant Delivery</h3>
+                <p class="text-muted small">קבל את המשחק שלך מיד לאחר הרכישה ללא המתנה.</p>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="p-4 rounded-4 shadow-sm h-100 bg-white border">
+                <div class="h1 mb-3">🛡️</div>
+                <h3 class="h5 fw-bold">Secure Payment</h3>
+                <p class="text-muted small">מערכת תשלומים מאובטחת ומוצפנת לשמירה על הפרטיות שלך.</p>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="p-4 rounded-4 shadow-sm h-100 bg-white border">
+                <div class="h1 mb-3">💎</div>
+                <h3 class="h5 fw-bold">Best Prices</h3>
+                <p class="text-muted small">הנחות בלעדיות ומבצעים שבועיים על המשחקים הכי חמים.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* הוספת אנימציה קלה לכפתורים */
+    .btn:hover {
+        transform: translateY(-3px);
+        transition: all 0.3s ease;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.3) !important;
+    }
+
+    body {
+        background-color: #f8f9fa; /* רקע אפרפר בהיר לנראות נקייה */
+    }
+</style>

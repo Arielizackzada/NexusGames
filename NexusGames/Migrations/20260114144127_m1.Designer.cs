@@ -12,8 +12,8 @@ using NexusGames.Data;
 namespace NexusGames.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260105111449_m2jhghuusdsd")]
-    partial class m2jhghuusdsd
+    [Migration("20260114144127_m1")]
+    partial class m1
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -50,19 +50,96 @@ namespace NexusGames.Migrations
 
             modelBuilder.Entity("NexusGames.Models.Category", b =>
                 {
-                    b.Property<int>("CategoryId")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CategoryId"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("CategoryId");
+                    b.HasKey("Id");
 
                     b.ToTable("Categories");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "Action"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Name = "Adventure"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Name = "RPG"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Name = "Strategy"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            Name = "Simulation"
+                        },
+                        new
+                        {
+                            Id = 6,
+                            Name = "Sports"
+                        },
+                        new
+                        {
+                            Id = 7,
+                            Name = "Puzzle"
+                        },
+                        new
+                        {
+                            Id = 8,
+                            Name = "Horror"
+                        },
+                        new
+                        {
+                            Id = 9,
+                            Name = "MMO"
+                        },
+                        new
+                        {
+                            Id = 10,
+                            Name = "Indie"
+                        },
+                        new
+                        {
+                            Id = 11,
+                            Name = "Racing"
+                        },
+                        new
+                        {
+                            Id = 12,
+                            Name = "Fighting"
+                        },
+                        new
+                        {
+                            Id = 13,
+                            Name = "Platformer"
+                        },
+                        new
+                        {
+                            Id = 14,
+                            Name = "Shooter"
+                        },
+                        new
+                        {
+                            Id = 15,
+                            Name = "Strategy"
+                        });
                 });
 
             modelBuilder.Entity("NexusGames.Models.Game", b =>
@@ -77,7 +154,8 @@ namespace NexusGames.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("CategoryId")
+                    b.Property<int?>("CategoryId")
+                        .IsRequired()
                         .HasColumnType("int");
 
                     b.Property<string>("Description")
@@ -88,8 +166,8 @@ namespace NexusGames.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("Price")
-                        .HasColumnType("int");
+                    b.Property<decimal>("Price")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<DateTime>("ReleaseDate")
                         .HasColumnType("datetime2");
@@ -117,9 +195,8 @@ namespace NexusGames.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("DateOfBirth")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<DateTime>("DateOfBirth")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Email")
                         .IsRequired()
